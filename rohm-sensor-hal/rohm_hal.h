@@ -21,9 +21,6 @@
     #include "mbed.h"               //types
     #include "I2C.h"                //I2C
 
-    #ifndef uint8_t
-        #define uint8_t int
-    #endif
     #define USE_MBED_HARDWARE_I2C
     extern Serial pc;
     //Serial pc(USBTX, USBRX); done in main.cpp
