@@ -18,48 +18,53 @@
 /* This file is meant for making same code work on many platforms easier. */
 #ifdef __MBED__
     /* Mbed Classic */
+    #define USE_MBED_HARDWARE_I2C
     #include "mbed.h"               //types
     #include "I2C.h"                //I2C
 
-    #define USE_MBED_HARDWARE_I2C
     extern Serial pc;
     //Serial pc(USBTX, USBRX); done in main.cpp
-    #define DEBUG_print(...)    pc.printf(__VA_ARGS__)
-    #define DEBUG_printf(...)   pc.printf(__VA_ARGS__)
-    #define DEBUG_println(...)  pc.printf(__VA_ARGS__);pc.printf("\r\n")
+
+    #define rohmhal_delay()         wait()
+    #define rohmhal_print(...)      pc.printf(__VA_ARGS__)
+    #define rohmhal_printf(...)     pc.printf(__VA_ARGS__)
+    #define rohmhal_println(...)    pc.printf(__VA_ARGS__);pc.printf("\r\n")
+
 #elif defined(YOTTA_MODULE_NAME)
     /* Mbed OS */
+    #define USE_MBED_HARDWARE_I2C
     #include "mbed-drivers/mbed.h"  //types, Serial, I2C -type, ...
     #include "mbed-drivers/I2C.h"   //I2C
 
-    #define USE_MBED_HARDWARE_I2C
     //get_stdio_serial().baud(115200); done in main.cpp
 
-    #define DEBUG_print(...)    printf(__VA_ARGS__)
-    #define DEBUG_printf(...)   printf(__VA_ARGS__)
-    #define DEBUG_println(...)  printf(__VA_ARGS__);printf("\r\n")
+    #define rohmhal_delay()         wait()
+    #define rohmhal_print(...)      printf(__VA_ARGS__)
+    #define rohmhal_printf(...)     printf(__VA_ARGS__)
+    #define rohmhal_println(...)    printf(__VA_ARGS__);printf("\r\n")
 
-#elif __ARDUINO__
+#elif ARDUINO
     /* Arduino */
-    #include <arduino.h>            //types, Serial
-
     //#define USE_ARDUINO_SOFTWARE_I2C
     #define USE_ARDUINO_HARDWARE_I2C
+    #include <arduino.h>            //types, Serial
+	/* i2c library is included in .cpp because sw library can */
 
-    #define DEBUG_printf(a)         Serial.print(a)
-    #define DEBUG_printf(a, b)      Serial.print(a);Serial.print(b)
-    #define DEBUG_printf(a, b, c)       Serial.print(a);Serial.print(b);Serial.print(c)
-    #define DEBUG_printf(a, b, c, ...)  Serial.print(a);Serial.print(b);Serial.print(c)
-    #define DEBUG_print()           Serial.print()
-    #define DEBUG_println()         Serial.println()
+    #define rohmhal_delay(a)        delay(a)
+    #define rohmhal_printf(a, ...)  Serial.print(a) //no printf->just display formatting sentence.
+    #define rohmhal_print()         Serial.print()
+    #define rohmhal_println()       Serial.println()
 #else
     #error "rohm_hal.h: Not valid target."
 #endif
 
 #if 0       //Enable/disable debug prints
-    #define DEBUG_print()
-    #define DEBUG_printf()
-    #define DEBUG_println()
+    #undef rohmhal_print
+    #undef rohmhal_printf
+    #undef rohmhal_println
+    #define rohmhal_print(...)
+    #define rohmhal_printf(...)
+    #define rohmhal_println(...)
 #endif
 
 #endif /* ROHM_HAL_H */

@@ -12,47 +12,48 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "../rohm-sensor-hal/rohm_hal.h"           //types, USE_MBED_HARDWARE_I2C, rohmhal_print*, I2C.h, I2C_SDA, I2C_SCL
-#ifdef USE_MBED_HARDWARE_I2C
+#include "../rohm-sensor-hal/rohm_hal.h"           //types, USE_ARDUINO_HARDWARE_I2C, rohmhal_print*
+#ifdef USE_ARDUINO_HARDWARE_I2C
 #include "../rohm-sensor-hal/I2CCommon.h"          //prototypes
-#define I2C_WRITE 0
-#define I2C_READ  1
-I2C i2c(I2C_SDA, I2C_SCL);
+#include <Wire.h>               //i2c Wire
 
-
-//Note that I2CCommonBegin() must be called before using read/write functions.
+//Note that I2CCommonBegin() must be called in .ino setup() -function before using these functions.
 bool I2CCommonBegin(){
+    Wire.begin();
     return( true );        //always succeeds
 }
 
 /* i2c common functions */
 uint8_t read_register(uint8_t sad, uint8_t reg, uint8_t* buf, uint8_t buf_len) {
-    uint8_t received_bytes;
-    int read_ok;
+      int incoming;
+      uint8_t received_bytes;
 
-    i2c.write( (int)((sad << 1) | I2C_WRITE), (char*)&reg, (int)1 );
-    read_ok = i2c.read( (int)((sad << 1) | I2C_READ), (char*)buf, (int)buf_len);
+      Wire.beginTransmission(sad);
+      Wire.write(reg);
+      Wire.endTransmission();
 
-    if( read_ok == 0 ){     //0 == success(ack)
-        received_bytes = buf_len;
-        }
-    else{                   //non0 == fail (nack)
-        received_bytes = 0;
-        }
-    return( received_bytes );
+      Wire.requestFrom(sad, (uint8_t) buf_len, (uint8_t) true);
+      received_bytes = 0;
+      while( Wire.available() && ( buf_len > received_bytes ) ){
+            incoming = Wire.read();
+            buf[received_bytes] = (uint8_t) ( incoming & 0xff );
+            received_bytes++;
+            }
+      return( received_bytes );
 }
 
 void write_registers(uint8_t sad, uint8_t reg, uint8_t* data, uint8_t data_len) {
-    i2c.write( (int)((sad << 1) | I2C_WRITE ), (char*)&reg, (int)1, true);
-    i2c.write( (int)((sad << 1) | I2C_WRITE ), (char*)data, (int)data_len, false);
+    Wire.beginTransmission(sad);
+    Wire.write(reg);
+    Wire.write(data, data_len);
+    Wire.endTransmission();
 }
 
 void write_register(uint8_t sad, uint8_t reg, uint8_t data) {
-    char data_to_send[2];
-
-    data_to_send[0] = reg;
-    data_to_send[1] = data;
-    i2c.write( (int)((sad << 1) | I2C_WRITE ), &data_to_send[0], 2);
+    Wire.beginTransmission(sad);
+    Wire.write(reg);
+    Wire.write(data);
+    Wire.endTransmission();
 }
 
 bool change_bits(uint8_t sad, uint8_t reg, uint8_t mask, uint8_t bits){
@@ -70,6 +71,4 @@ bool change_bits(uint8_t sad, uint8_t reg, uint8_t mask, uint8_t bits){
         }
 }
 
-#endif /* USE_MBED_HARDWARE_I2C */
-
-
+#endif /* USE_ARDUINO_HARDWARE_I2C */
