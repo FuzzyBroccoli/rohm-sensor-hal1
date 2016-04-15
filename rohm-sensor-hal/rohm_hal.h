@@ -25,7 +25,7 @@
     extern Serial pc;
     //Serial pc(USBTX, USBRX); done in main.cpp
 
-    #define rohmhal_delay()         wait()
+    #define rohmhal_delay(a)         wait(a)
     #define rohmhal_print(...)      pc.printf(__VA_ARGS__)
     #define rohmhal_printf(...)     pc.printf(__VA_ARGS__)
     #define rohmhal_println(...)    pc.printf(__VA_ARGS__);pc.printf("\r\n")
@@ -38,7 +38,7 @@
 
     //get_stdio_serial().baud(115200); done in main.cpp
 
-    #define rohmhal_delay()         wait()
+    #define rohmhal_delay(a)         wait(a)
     #define rohmhal_print(...)      printf(__VA_ARGS__)
     #define rohmhal_printf(...)     printf(__VA_ARGS__)
     #define rohmhal_println(...)    printf(__VA_ARGS__);printf("\r\n")
